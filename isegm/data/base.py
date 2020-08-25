@@ -26,19 +26,20 @@ class ISDataset(torch.utils.data.dataset.Dataset):
                  zoom_in=None,
                  epoch_len=-1):
         super(ISDataset, self).__init__()
-        self.epoch_len = epoch_len
-        self.num_masks = num_masks
-        self.points_from_one_object = points_from_one_object
-        self.input_transform = input_transform
-        self.augmentator = augmentator
-        self.image_rescale = image_rescale
-        self.min_object_area = min_object_area
-        self.min_ignore_object_area = min_ignore_object_area
-        self.keep_background_prob = keep_background_prob
-        self.points_sampler = points_sampler
-        self.with_image_info = with_image_info
-        self.samples_precomputed_scores = self._load_samples_scores(samples_scores_path, samples_scores_gamma)
-        self.zoom_in = zoom_in
+        self.epoch_len = epoch_len # > -1
+        self.num_masks = num_masks # > 1
+        self.points_from_one_object = points_from_one_object # > False
+        self.input_transform = input_transform # > Normalize()
+        self.augmentator = augmentator # > train_augmentator
+        self.image_rescale = image_rescale # > scale_func()
+        self.min_object_area = min_object_area # > 80
+        self.min_ignore_object_area = min_ignore_object_area # > 10
+        self.keep_background_prob = keep_background_prob # > 0.0
+        self.points_sampler = points_sampler # > MultiPointSampler()
+        self.with_image_info = with_image_info # > False
+        self.samples_precomputed_scores = self._load_samples_scores(samples_scores_path, samples_scores_gamma) 
+                                                                    # > './models/sbd/sbd_samples_weights.pkl', 1.25
+        self.zoom_in = zoom_in # > None
         if isinstance(self.image_rescale, (float, int)):
             scale = self.image_rescale
             self.image_rescale = lambda shape: scale

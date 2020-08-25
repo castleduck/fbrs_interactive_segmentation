@@ -6,13 +6,18 @@ from isegm.utils.exp import init_experiment
 
 
 def main():
+    # 1) Parse arguments
     args = parse_args()
+    # 2) Load model module
     model_script = load_module(args.model_path)
 
+    # 3) Initialize experiment by configuration
     cfg = init_experiment(args)
 
+    # 4) Set PyTorch configuration
     torch.backends.cudnn.benchmark = True
     torch.multiprocessing.set_sharing_strategy('file_system')
+    # 5) Run main of model
     model_script.main(cfg)
 
 

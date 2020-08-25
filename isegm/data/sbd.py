@@ -14,14 +14,14 @@ class SBDDataset(ISDataset):
         super(SBDDataset, self).__init__(**kwargs)
         assert split in {'train', 'val'}
 
-        self.dataset_path = Path(dataset_path)
-        self.dataset_split = split
-        self._images_path = self.dataset_path / 'img'
-        self._insts_path = self.dataset_path / 'inst'
+        self.dataset_path = Path(dataset_path) # > /datasets/InteractiveSegmentation/SBD
+        self.dataset_split = split # > train
+        self._images_path = self.dataset_path / 'img' # > /datasets/InteractiveSegmentation/SBD/img
+        self._insts_path = self.dataset_path / 'inst' # > /datasets/InteractiveSegmentation/SBD/inst
         self._buggy_objects = dict()
-        self._buggy_mask_thresh = buggy_mask_thresh
+        self._buggy_mask_thresh = buggy_mask_thresh # > 0.08
 
-        with open(self.dataset_path / f'{split}.txt', 'r') as f:
+        with open(self.dataset_path / f'{split}.txt', 'r') as f: # > /datasets/InteractiveSegmentation/SBD/train.txt
             self.dataset_samples = [x.strip() for x in f.readlines()]
 
     def get_sample(self, index):

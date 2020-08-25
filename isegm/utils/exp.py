@@ -13,21 +13,27 @@ from .log import logger, add_logging
 
 
 def init_experiment(args):
+    # 1) Get model path
     model_path = Path(args.model_path)
-    ftree = get_model_family_tree(model_path)
+    ftree = get_model_family_tree(model_path) # > [sbd, r101_dh256]
     if ftree is None:
         print('Models can only be located in the "models" directory in the root of the repository')
         sys.exit(1)
 
+    # 2-A) Load configuration
     cfg = load_config(model_path)
+    # 2-B) Update configuration with arguments
     update_config(cfg, args)
 
-    experiments_path = Path(cfg.EXPS_PATH)
-    exp_parent_path = experiments_path / '/'.join(ftree)
+    # 3) Create parent directory for experiment
+    experiments_path = Path(cfg.EXPS_PATH) # < ./experiments
+    exp_parent_path = experiments_path / '/'.join(ftree) # < ./experiments/sbd/r101_dh256
     exp_parent_path.mkdir(parents=True, exist_ok=True)
 
+    # 4-A) Resume experiment 
     if cfg.resume_exp:
         exp_path = find_resume_exp(exp_parent_path, cfg.resume_exp)
+    # 4-B) Set index after last experiment 
     else:
         last_exp_indx = find_last_exp_indx(exp_parent_path)
         exp_name = f'{last_exp_indx:03d}'
@@ -36,18 +42,22 @@ def init_experiment(args):
         exp_path = exp_parent_path / exp_name
         exp_path.mkdir(parents=True)
 
+    # 5) Set path for experiment
     cfg.EXP_PATH = exp_path
     cfg.CHECKPOINTS_PATH = exp_path / 'checkpoints'
     cfg.VIS_PATH = exp_path / 'vis'
     cfg.LOGS_PATH = exp_path / 'logs'
 
+    # 6) Create directories for logging
     cfg.LOGS_PATH.mkdir(exist_ok=True)
     cfg.CHECKPOINTS_PATH.mkdir(exist_ok=True)
     cfg.VIS_PATH.mkdir(exist_ok=True)
 
+    # 7) Copy model file
     dst_script_path = exp_path / (model_path.stem + datetime.strftime(datetime.today(), '_%Y-%m-%d-%H-%M-%S.py'))
     shutil.copy(model_path, dst_script_path)
 
+    # 8) Get GPU IDs
     if cfg.gpus != '':
         gpu_ids = [int(id) for id in cfg.gpus.split(',')]
     else:
@@ -57,32 +67,36 @@ def init_experiment(args):
     cfg.ngpus = len(gpu_ids)
     cfg.multi_gpu = cfg.ngpus > 1
 
+    # 9) Set GPU
     if cfg.multi_gpu:
         os.environ['CUDA_VISIBLE_DEVICES'] = cfg.gpus
         ngpus = torch.cuda.device_count()
         assert ngpus == cfg.ngpus
     cfg.device = torch.device(f'cuda:{cfg.gpu_ids[0]}')
 
+    # 10) Set log file
     add_logging(cfg.LOGS_PATH, prefix='train_')
 
+    # 11) Add experiment info to log
     logger.info(f'Number of GPUs: {len(cfg.gpu_ids)}')
     logger.info('Run experiment with config:')
     logger.info(pprint.pformat(cfg, indent=4))
 
+    # 12) Return configuration
     return cfg
 
 
 def get_model_family_tree(model_path, terminate_name='models'):
-    model_name = model_path.stem
-    family_tree = [model_name]
+    model_name = model_path.stem # > r101_dh256
+    family_tree = [model_name] 
     for x in model_path.parents:
-        if x.stem == terminate_name:
+        if x.stem == terminate_name: 
             break
-        family_tree.append(x.stem)
+        family_tree.append(x.stem) # > [r101_dh256, sbd]
     else:
         return None
 
-    return family_tree[::-1]
+    return family_tree[::-1] # > [sbd, r101_dh256]
 
 
 def find_last_exp_indx(exp_parent_path):
@@ -123,8 +137,8 @@ def update_config(cfg, args):
 
 
 def load_config(model_path):
-    model_name = model_path.stem
-    config_path = model_path.parent / (model_name + '.yml')
+    model_name = model_path.stem # > r101_dh256
+    config_path = model_path.parent / (model_name + '.yml') # > ./models/sbd/r101_dh256.yml
 
     if config_path.exists():
         cfg = load_config_file(config_path)
@@ -132,9 +146,9 @@ def load_config(model_path):
         cfg = dict()
 
     cwd = Path.cwd()
-    config_parent = config_path.parent.absolute()
+    config_parent = config_path.parent.absolute() 
     while len(config_parent.parents) > 0:
-        config_path = config_parent / 'config.yml'
+        config_path = config_parent / 'config.yml' # > ./models/sbd/config.yml 
 
         if config_path.exists():
             local_config = load_config_file(config_path, model_name=model_name)
@@ -142,7 +156,7 @@ def load_config(model_path):
 
         if config_parent.absolute() == cwd:
             break
-        config_parent = config_parent.parent
+        config_parent = config_parent.parent # > ./models/config.yml > ./config.yml
 
     return edict(cfg)
 
