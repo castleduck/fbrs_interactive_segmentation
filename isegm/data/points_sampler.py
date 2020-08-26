@@ -106,9 +106,17 @@ class MultiPointSampler(BasePointSampler):
                 mask = np.logical_or(mask, x)
         else:
             random_id = random.choice(dataset_sample['objects_ids'])
-            mask = dataset_sample['instances_mask'] == random_id
+            mask = dataset_sample['instances_mask'] == random_id # Broadcaseting
             self._selected_indices = [np.argwhere(self._positive_erode(mask))]
 
+        # print("\n")
+        # print(
+        # "# ---------------------------------------------------------------------------- #\n",
+        # "#                                     Check                                    #\n",
+        # "# ---------------------------------------------------------------------------- #")
+        # print("mask.shape", mask.shape)
+        # exit()
+        
         self.selected_mask = mask
         neg_indices_bg = np.argwhere(np.logical_not(mask))
         neg_indices_border = np.argwhere(self._get_border_mask(mask))

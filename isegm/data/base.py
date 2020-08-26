@@ -86,6 +86,14 @@ class ISDataset(torch.utils.data.dataset.Dataset):
             masks.append(self.points_sampler.selected_mask)
             if not self.points_from_one_object:
                 self.points_sampler.sample_object(sample)
+                
+        # print("\n")
+        # print(
+        # "# ---------------------------------------------------------------------------- #\n",
+        # "#                                     Check                                    #\n",
+        # "# ---------------------------------------------------------------------------- #")
+        # print("masks[0].shape", masks[0].shape)
+        # exit()
 
         masks = np.array(masks)
         points = np.array(points, dtype=np.float32)
@@ -97,6 +105,20 @@ class ISDataset(torch.utils.data.dataset.Dataset):
             'points': points.astype(np.float32),
             'instances': masks
         }
+
+        # print("\n")
+        # print(
+        # "# ---------------------------------------------------------------------------- #\n",
+        # "#                                     Check                                    #\n",
+        # "# ---------------------------------------------------------------------------- #")
+        # print("output['images'].shape", output['images'].shape)
+        # print("output['points'].shape", output['points'].shape)
+        # print("output['instances'].shape", output['instances'].shape)
+        # print("np.sum(output['instances'])", np.sum(output['instances']))
+        # print("np.max(output['instances'])", np.max(output['instances']))
+        # print("type(output['instances'][0][0][0][0])", type(output['instances'][0][0][0][0]))
+        # print("\n")
+        # exit()
 
         if self.with_image_info and 'image_id' in sample:
             output['image_info'] = sample['image_id']

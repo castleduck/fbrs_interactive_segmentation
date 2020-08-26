@@ -26,14 +26,25 @@ class SBDDataset(ISDataset):
 
     def get_sample(self, index):
         image_name = self.dataset_samples[index]
-        image_path = str(self._images_path / f'{image_name}.jpg')
-        inst_info_path = str(self._insts_path / f'{image_name}.mat')
+        image_path = str(self._images_path / f'{image_name}.jpg') # > /datasets/InteractiveSegmentation/SBD/img/2008_000002.jpg
+        inst_info_path = str(self._insts_path / f'{image_name}.mat') # > /datasets/InteractiveSegmentation/SBD/inst/2008_000002.jpg
 
         image = cv2.imread(image_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         instances_mask = loadmat(str(inst_info_path))['GTinst'][0][0][0].astype(np.int32)
         instances_mask = self.remove_buggy_masks(index, instances_mask)
         instances_ids = get_unique_labels(instances_mask, exclude_zero=True)
+
+        # print("\n")
+        # print(
+        # "# ---------------------------------------------------------------------------- #\n",
+        # "#                                     Check                                    #\n",
+        # "# ---------------------------------------------------------------------------- #")
+        # print("instances_mask.shape", instances_mask.shape)
+        # print("type(instances_mask)", type(instances_mask))
+        # print("np.max(instances_mask)", np.max(instances_mask))
+        # print("np.min(instances_mask)", np.min(instances_mask))
+        # exit()
 
         instances_info = {
             x: {'ignore': False}
