@@ -1,4 +1,6 @@
+import glob
 import pickle as pkl
+import re
 from pathlib import Path
 
 import cv2
@@ -8,20 +10,37 @@ from scipy.io import loadmat
 from isegm.utils.misc import get_bbox_from_mask
 from .base import ISDataset, get_unique_labels
 
+def get_list_patch_IDs(get_patch_IDs_from, file_format):
+    patch_ID_format = '[0-9]{3}_l1_[0-9]{6}x[0-9]{6}'
+    reg_exp_patch_ID = re.compile(patch_ID_format)
+    
+    list_patch_IDs = []
+    list_patch_fn = sorted(glob.glob(get_patch_IDs_from + '*.' + file_format))
+    for patch_fn in list_patch_fn:
+        ID = reg_exp_patch_ID.findall(patch_fn.split('/')[-1])[0]
+        list_patch_IDs.append(ID)
+        
+    return list_patch_IDs
+
 class CustomDataset(ISDataset):
     def __init__(self, dataset_path, split='train', buggy_mask_thresh=0.08, **kwargs):
         super(CustomDataset, self).__init__(**kwargs)
         assert split in {'train', 'val'}
 
-        self.dataset_path = Path(dataset_path) # > /datasets/InteractiveSegmentation/SBD
-        self.dataset_split = split # > train
-        self._images_path = self.dataset_path / 'origs' # > /datasets/InteractiveSegmentation/SBD/img
-        self._insts_path = self.dataset_path / 'gts' # > /datasets/InteractiveSegmentation/SBD/inst
+        self._dataset_path = Path(dataset_path) # > /datasets/InteractiveSegmentation/SBD
+        # self.dataset_split = split # > train
+        self._images_path = self._dataset_path / 'origs' # > /datasets/InteractiveSegmentation/SBD/img
+        self._insts_path = self._dataset_path / 'gts' # > /datasets/InteractiveSegmentation/SBD/inst
         self._buggy_objects = dict()
         self._buggy_mask_thresh = buggy_mask_thresh # > 0.08
 
-        with open(self.dataset_path / f'{split}.txt', 'r') as f: # > /datasets/InteractiveSegmentation/SBD/train.txt
-            self.dataset_samples = [x.strip() for x in f.readlines()]
+        # with open(self._dataset_path / f'{split}.txt', 'r') as f: # > /datasets/InteractiveSegmentation/SBD/train.txt
+        #     self.dataset_samples = [x.strip() for x in f.readlines()]
+        self.dataset_samples = get_list_patch_IDs(get_patch_IDs_from = str(self._images_path) + '/',
+                                                  file_format = 'tif')
+
+        print(self.dataset_samples)
+        exit()
 
     def get_sample(self, index):
         image_name = self.dataset_samples[index]
