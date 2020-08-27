@@ -1,3 +1,4 @@
+from isegm.data.custom import CustomDataset
 import random
 from functools import partial
 
@@ -84,9 +85,9 @@ def train(model, cfg, model_cfg, start_epoch=0):
     points_sampler = MultiPointSampler(model_cfg.num_max_points, prob_gamma=0.7,
                                        merge_objects_prob=0.15,
                                        max_num_merged_objects=2)
-
-    trainset = SBDDataset(
-        cfg.SBD_PATH,
+    
+    trainset = CustomDataset(
+        cfg.CUSTOM_TRAIN_PATH,
         split='train',
         num_masks=num_masks,
         augmentator=train_augmentator,
@@ -100,8 +101,8 @@ def train(model, cfg, model_cfg, start_epoch=0):
         samples_scores_gamma=1.25
     )
 
-    valset = SBDDataset(
-        cfg.SBD_PATH,
+    valset = CustomDataset(
+        cfg.CUSTOM_VALID_PATH,
         split='val',
         augmentator=val_augmentator,
         num_masks=num_masks,
