@@ -68,14 +68,14 @@ def train(model, cfg, model_cfg, start_epoch=0):
         ShiftScaleRotate(shift_limit=0.03, scale_limit=0,
                          rotate_limit=(-3, 3), border_mode=0, p=0.75),
         PadIfNeeded(min_height=crop_size[0], min_width=crop_size[1], border_mode=0),
-        RandomCrop(*crop_size),
+        #RandomCrop(*crop_size),
         RandomBrightnessContrast(brightness_limit=(-0.25, 0.25), contrast_limit=(-0.15, 0.4), p=0.75),
         RGBShift(r_shift_limit=10, g_shift_limit=10, b_shift_limit=10, p=0.75)
     ], p=1.0)
 
     val_augmentator = Compose([
         PadIfNeeded(min_height=crop_size[0], min_width=crop_size[1], border_mode=0),
-        RandomCrop(*crop_size)
+        #RandomCrop(*crop_size)
     ], p=1.0)
 
     def scale_func(image_shape):
