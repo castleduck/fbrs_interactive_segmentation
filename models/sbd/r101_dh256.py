@@ -14,7 +14,8 @@ from isegm.engine.trainer import ISTrainer
 from isegm.model.is_deeplab_model import get_deeplab_model
 from isegm.model.losses import NormalizedFocalLossSigmoid
 from isegm.model.metrics import AdaptiveIoU
-from isegm.data.sbd import SBDDataset
+# from isegm.data.sbd import SBDDataset
+from isegm.data.custom import CustomDataset
 from isegm.data.points_sampler import MultiPointSampler
 from isegm.utils.log import logger
 from isegm.model import initializer
@@ -68,14 +69,14 @@ def train(model, cfg, model_cfg, start_epoch=0):
         RandomRotate90(),
         ShiftScaleRotate(shift_limit=0.03, scale_limit=0,
                          rotate_limit=(-3, 3), border_mode=0, p=0.75),
-        PadIfNeeded(min_height=crop_size[0], min_width=crop_size[1], border_mode=0),
+        #PadIfNeeded(min_height=crop_size[0], min_width=crop_size[1], border_mode=0),
         #RandomCrop(*crop_size),
         RandomBrightnessContrast(brightness_limit=(-0.25, 0.25), contrast_limit=(-0.15, 0.4), p=0.75),
         RGBShift(r_shift_limit=10, g_shift_limit=10, b_shift_limit=10, p=0.75)
     ], p=1.0)
 
     val_augmentator = Compose([
-        PadIfNeeded(min_height=crop_size[0], min_width=crop_size[1], border_mode=0),
+        #PadIfNeeded(min_height=crop_size[0], min_width=crop_size[1], border_mode=0),
         #RandomCrop(*crop_size)
     ], p=1.0)
 
@@ -95,10 +96,10 @@ def train(model, cfg, model_cfg, start_epoch=0):
         input_transform=model_cfg.input_transform,
         min_object_area=80,
         keep_background_prob=0.0,
-        image_rescale=scale_func,
+        # image_rescale=scale_func,
         points_sampler=points_sampler,
-        samples_scores_path='./models/sbd/sbd_samples_weights.pkl',
-        samples_scores_gamma=1.25
+        # samples_scores_path='./models/sbd/sbd_samples_weights.pkl',
+        # samples_scores_gamma=1.25
     )
 
     valset = CustomDataset(
@@ -109,7 +110,7 @@ def train(model, cfg, model_cfg, start_epoch=0):
         points_from_one_object=False,
         input_transform=model_cfg.input_transform,
         min_object_area=80,
-        image_rescale=scale_func,
+        # image_rescale=scale_func,
         points_sampler=points_sampler
     )
 

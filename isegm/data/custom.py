@@ -6,6 +6,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 from scipy.io import loadmat
+from skimage import io
 
 from isegm.utils.misc import get_bbox_from_mask
 from .base import ISDataset, get_unique_labels
@@ -39,18 +40,20 @@ class CustomDataset(ISDataset):
         self.dataset_samples = get_list_patch_IDs(get_patch_IDs_from = str(self._images_path) + '/',
                                                   file_format = 'tif')
 
-        print(self.dataset_samples)
-        exit()
-
-    def get_sample(self, index):
+    def get_sample(self, index):       
         image_name = self.dataset_samples[index]
-        image_path = str(self._images_path / f'{image_name}.tif') # > /datasets/InteractiveSegmentation/SBD/img/2008_000002.jpg
-        inst_info_path = str(self._insts_path / f'{image_name}.tif') # > /datasets/InteractiveSegmentation/SBD/inst/2008_000002.jpg
+        image_path = str(self._images_path / f'{image_name}_orig.tif') # > /datasets/InteractiveSegmentation/SBD/img/2008_000002.jpg
+        inst_info_path = str(self._insts_path / f'{image_name}_gt.tif') # > /datasets/InteractiveSegmentation/SBD/inst/2008_000002.jpg
 
-        image = cv2.imread(image_path)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        instances_mask = loadmat(str(inst_info_path))['GTinst'][0][0][0].astype(np.int32)
+        image = io.imread(image_path)
+        # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        instances_mask = io.imread(inst_info_path).astype(np.int32)
+        
         # instances_mask = self.remove_buggy_masks(index, instances_mask)
+        # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        # instances_mask = loadmat(str(inst_info_path))['GTinst'][0][0][0].astype(np.int32)
+        # instances_mask = self.remove_buggy_masks(index, instances_mask)
+        
         instances_ids = get_unique_labels(instances_mask, exclude_zero=True)
 
         # print("\n")
